@@ -1,0 +1,13 @@
+{
+    "name": "ahmadsubhan/library-web",
+    "description": "Library Management System",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Ahmad Subhan"
+        }
+    ],
+    "require": {
+        "php": ">=8.3"
+    }
+}
