@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Entities;
+namespace App\Models;
 
 class Book{
     private string $title;
@@ -21,14 +21,14 @@ class Book{
     // Getters
     public function getTitle(): string { return $this->title; }
     public function getAuthor(): string { return $this->author; }
-    public function getisbn(): string { return $this->isbn; }
+    public function getIsbn(): string { return $this->isbn; }
     public function getCategory(): string { return $this->category; }
     public function getYear(): int { return $this->year; }
 
     // Setters
     public function setTitle(string $title): void { $this->title = $title; }
     public function setAuthor(string $author): void { $this->author = $author; }
-    public function setisbn(string $isbn): void { $this->isbn = $isbn; }
+    public function setIsbn(string $isbn): void { $this->isbn = $isbn; }
     public function setCategory(string $category): void { $this->category = $category; }
     public function setYear(int $year): void { $this->year = $year; }
 }
