@@ -5,9 +5,9 @@ namespace App\Controllers;
 use App\Services\LibraryService;
 use App\Repositories\MySqlBookRepository;
 use App\Core\Database;
+use App\Core\View;
 use PDOException;
 
-// Handles incoming requests related to books.
 class BookController{
     private ?Database $database = null;
     private LibraryService $service;
@@ -15,7 +15,6 @@ class BookController{
     private MySqlBookRepository $repository;  
 
     public function __construct(){
-
         try{
             $this->database = new Database('localhost','Library_System','root','F240634@lhr.nu');
             $this->repository = new MySqlBookRepository($this->database);  
@@ -27,105 +26,53 @@ class BookController{
         }
     }
 
-    // Display a list of all books
-public function index(): void{
-    if ($this->error) {
-        echo $this->error;
-        $this->disconnect();
-        return;
-    }
-
-    $books = $this->service->listBooks();
-
-    echo "<h1>Books</h1>";
-
-    if (empty($books)) {
-        echo "<p>No books found.</p>";
-    } else {
-        echo '<table>
-            <tr>
-                <th>Title</th>
-                <th>Author</th>
-                <th>ISBN</th>
-                <th>Category</th>
-                <th>Year</th>
-                <th>Actions</th>
-            </tr>';
-        foreach ($books as $book) {
-            echo '<tr>
-                <td>' . htmlspecialchars($book->getTitle()) . '</td>
-                <td>' . htmlspecialchars($book->getAuthor()) . '</td>
-                <td>' . htmlspecialchars($book->getIsbn()) . '</td>
-                <td>' . htmlspecialchars($book->getCategory()) . '</td>
-                <td>' . htmlspecialchars($book->getYear()) . '</td>
-                <td>
-                    <a href="/books/show?isbn=' . urlencode($book->getIsbn()) . '">View</a>
-                    <a href="/books/edit?isbn=' . urlencode($book->getIsbn()) . '">Edit</a>
-                    <form method="POST" action="/books/delete" style="display: inline;">
-                        <input type="hidden" name="isbn" value="' . htmlspecialchars($book->getIsbn()) . '">
-                        <button type="submit" onclick="return confirm(\'Are you sure?\')">Delete</button>
-                    </form>
-                </td>
-            </tr>';
+    public function index(): void{
+        if ($this->error) {
+            $this->showError($this->error);
+            return;
         }
-        echo '</table>';
-    }
-    
-    $this->disconnect();
-}
 
-    // Display details of a specific book by ISBN
+        try {
+            $books = $this->service->listBooks();
+            View::render('books/index', ['books' => $books]);
+        } catch (\RuntimeException $e) {
+            $this->showError("View error: " . $e->getMessage());
+        }
+        
+        $this->disconnect();
+    }
+
     public function show(): void{
         if ($this->error) {
-            echo $this->error;
-            $this->disconnect();
+            $this->showError($this->error);
             return;
         }
 
         $isbn = $_GET['isbn'] ?? '';
-        $book = $this->service->searchByisbn($isbn);
+        $book = $this->service->searchByIsbn($isbn);
 
         if ($book === null) {
-            echo "<p>No book found with ISBN '$isbn'.</p>";
-            $this->disconnect();
+            $this->showError("No book found with ISBN '$isbn'.");
             return;
         }
 
-        echo "<h1>" . $book->getTitle() . "</h1>";
-        echo "<p>Author: " . $book->getAuthor() . "</p>";
-        echo "<p>ISBN: " . $book->getisbn() . "</p>";
-        echo "<p>Category: " . $book->getCategory() . "</p>";
-        echo "<p>Year: " . $book->getYear() . "</p>";
-        
+        View::render('books/show', ['book' => $book]);
         $this->disconnect();
     }
 
-    // Display the form to add a new book
     public function create(): void{
         if ($this->error) {
-            echo $this->error;
-            $this->disconnect();
+            $this->showError($this->error);
             return;
         }
 
-        echo "<h1>Add Book</h1>";
-        echo '<form method="POST" action="/books">
-                <input type="text" name="title" placeholder="Title"><br>
-                <input type="text" name="author" placeholder="Author"><br>
-                <input type="text" name="isbn" placeholder="ISBN"><br>
-                <input type="text" name="category" placeholder="Category"><br>
-                <input type="text" name="year" placeholder="Year"><br>
-                <button type="submit">Add Book</button>
-              </form>';
-        
+        View::render('books/create');
         $this->disconnect();
     }
 
-    // Process and store a newly created book
     public function store(): void{
         if ($this->error) {
-            echo $this->error;
-            $this->disconnect();
+            $this->showError($this->error);
             return;
         }
 
@@ -136,46 +83,31 @@ public function index(): void{
         $year     = (int)($_POST['year'] ?? 0);
 
         $message = $this->service->addBook($title, $author, $isbn, $category, $year);
-        echo "<p>$message</p>";
-        
+        View::render('books/store', ['message' => $message]);
         $this->disconnect();
     }
 
-    // Display the form to edit an existing book
     public function edit(): void{
         if ($this->error) {
-            echo $this->error;
-            $this->disconnect();
+            $this->showError($this->error);
             return;
         }
 
         $isbn = $_GET['isbn'] ?? '';
-        $book = $this->service->searchByisbn($isbn);
+        $book = $this->service->searchByIsbn($isbn);
 
         if ($book === null) {
-            echo "<p>No book found with ISBN '$isbn'.</p>";
-            $this->disconnect();
+            $this->showError("No book found with ISBN '$isbn'.");
             return;
         }
 
-        echo "<h1>Edit Book</h1>";
-        echo '<form method="POST" action="/books/update">
-                <input type="hidden" name="isbn" value="' . $book->getisbn() . '">
-                <input type="text" name="title" value="' . $book->getTitle() . '"><br>
-                <input type="text" name="author" value="' . $book->getAuthor() . '"><br>
-                <input type="text" name="category" value="' . $book->getCategory() . '"><br>
-                <input type="text" name="year" value="' . $book->getYear() . '"><br>
-                <button type="submit">Update Book</button>
-              </form>';
-        
+        View::render('books/edit', ['book' => $book]);
         $this->disconnect();
     }
 
-    // Process and update an existing book
     public function update(): void{
         if ($this->error) {
-            echo $this->error;
-            $this->disconnect();
+            $this->showError($this->error);
             return;
         }
 
@@ -188,27 +120,27 @@ public function index(): void{
         ];
 
         $message = $this->service->updateBook($isbn, $data);
-        echo "<p>$message</p>";
-        
+        View::render('books/update', ['message' => $message, 'isbn' => $isbn]);
         $this->disconnect();
     }
 
-    // Delete a book by ISBN
     public function destroy(): void{
         if ($this->error) {
-            echo $this->error;
-            $this->disconnect();
+            $this->showError($this->error);
             return;
         }
 
         $isbn = $_POST['isbn'] ?? '';
         $message = $this->service->deleteBook($isbn);
-        echo "<p>$message</p>";
-        
+        View::render('books/delete', ['message' => $message]);
         $this->disconnect();
     }
 
-    // Disconnect database connection
+    private function showError(string $errorMessage): void{
+    View::render('errors/error', ['message' => $errorMessage]);
+    $this->disconnect();
+    }
+
     public function disconnect(): void{
         if ($this->database !== null) {
             $this->database->disconnect();
