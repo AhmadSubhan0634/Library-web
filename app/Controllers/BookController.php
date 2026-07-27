@@ -26,6 +26,13 @@ class BookController{
         }
     }
 
+    private function requireLogin(): void{
+    if(!isset($_SESSION['user_id'])){
+        header('Location: /login');
+        exit();
+    }
+    }   
+
     public function index(): void{
         if ($this->error) {
             $this->showError($this->error);
@@ -66,6 +73,8 @@ class BookController{
             return;
         }
 
+        $this->requireLogin();
+
         View::render('books/create');
         $this->disconnect();
     }
@@ -75,6 +84,8 @@ class BookController{
             $this->showError($this->error);
             return;
         }
+
+        $this->requireLogin();
 
         $title    = $_POST['title'] ?? '';
         $author   = $_POST['author'] ?? '';
@@ -92,6 +103,8 @@ class BookController{
             $this->showError($this->error);
             return;
         }
+
+        $this->requireLogin();
 
         $isbn = $_GET['isbn'] ?? '';
         $book = $this->service->searchByIsbn($isbn);
@@ -111,6 +124,8 @@ class BookController{
             return;
         }
 
+        $this->requireLogin();
+
         $isbn = $_POST['isbn'] ?? '';
         $data = [
             'title'    => $_POST['title'] ?? '',
@@ -129,6 +144,8 @@ class BookController{
             $this->showError($this->error);
             return;
         }
+
+        $this->requireLogin();
 
         $isbn = $_POST['isbn'] ?? '';
         $message = $this->service->deleteBook($isbn);
