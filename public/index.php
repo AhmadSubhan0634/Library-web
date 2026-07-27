@@ -1,13 +1,13 @@
 <?php
-// $router->get('/', HomeController::class . '@index');
-// $router->get('/books', BookController::class . '@index');
-// $router->post('/books', BookController::class . '@store');
+
+session_start();
 
 require __DIR__ . '/../vendor/autoload.php';
 
 use App\Core\Router;
 use App\Controllers\HomeController;
 use App\Controllers\BookController;
+use App\Controllers\AuthController;
 
 $router = new Router();
 
@@ -15,12 +15,19 @@ $router = new Router();
 $router->get('/', HomeController::class . '@index');
 
 // Book routes
-$router->get('/books', BookController::class . '@index');           // List all books
-$router->get('/books/create', BookController::class . '@create');   // Show create form
+$router->get('/books', BookController::class . '@index');
+$router->get('/books/create', BookController::class . '@create');
 $router->post('/books/store', BookController::class . '@store');
-$router->get('/books/show', BookController::class . '@show');       // Show single book
-$router->get('/books/edit', BookController::class . '@edit');       // Show edit form
-$router->post('/books/update', BookController::class . '@update');  // Update book
-$router->post('/books/delete', BookController::class . '@destroy'); // Delete book
+$router->get('/books/show', BookController::class . '@show');
+$router->get('/books/edit', BookController::class . '@edit');
+$router->post('/books/update', BookController::class . '@update');
+$router->post('/books/delete', BookController::class . '@destroy');
+
+// Auth routes
+$router->get('/login', AuthController::class . '@showLogin');
+$router->post('/login', AuthController::class . '@login');
+$router->get('/register', AuthController::class . '@showRegister');
+$router->post('/register', AuthController::class . '@register');
+$router->get('/logout', AuthController::class . '@logout');
 
 $router->resolve();

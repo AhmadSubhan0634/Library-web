@@ -45,7 +45,7 @@ class AuthController{
             return;
         }
 
-        $username = $_POST['username'] ?? '';
+        $username = trim($_POST['username'] ?? '');
         $password = $_POST['password'] ?? '';
 
         $user = $this->repository->findByUsername($username);
@@ -128,10 +128,8 @@ class AuthController{
     }
 
     private function showError(string $errorMessage): void{
-        echo "<h1>Error</h1>";
-        echo "<p style='color: red;'>" . htmlspecialchars($errorMessage) . "</p>";
-        echo "<a href='/books'>Continue browsing as guest</a>";
-        $this->disconnect();
+    View::render('errors/error', ['message' => $errorMessage]);
+    $this->disconnect();
     }
 
     public function disconnect(): void{
