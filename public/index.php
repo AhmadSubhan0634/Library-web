@@ -1,35 +1,26 @@
 <?php
+// $router->get('/', HomeController::class . '@index');
+// $router->get('/books', BookController::class . '@index');
+// $router->post('/books', BookController::class . '@store');
 
-// The ONLY require in the entire application.
 require __DIR__ . '/../vendor/autoload.php';
 
 use App\Core\Router;
-use App\Core\Database;
-use App\Core\Request;
-use App\Core\Response;
-use App\Core\View;
 use App\Controllers\HomeController;
 use App\Controllers\BookController;
-use App\Controllers\AuthController;
-use App\Models\Book;
-use App\Models\User;
 
-$classes = [
-    Router::class,
-    Database::class,
-    Request::class,
-    Response::class,
-    View::class,
-    HomeController::class,
-    BookController::class,
-    AuthController::class,
-    Book::class,
-    User::class,
-];
+$router = new Router();
 
-echo "Composer autoloading check:\n\n";
+// Home route
+$router->get('/', HomeController::class . '@index');
 
-foreach ($classes as $class) {
-    $loaded = class_exists($class) ? 'OK' : 'FAILED';
-    echo "{$class} ... {$loaded}\n";
-}
+// Book routes
+$router->get('/books', BookController::class . '@index');           // List all books
+$router->get('/books/create', BookController::class . '@create');   // Show create form
+$router->post('/books/store', BookController::class . '@store');
+$router->get('/books/show', BookController::class . '@show');       // Show single book
+$router->get('/books/edit', BookController::class . '@edit');       // Show edit form
+$router->post('/books/update', BookController::class . '@update');  // Update book
+$router->post('/books/delete', BookController::class . '@destroy'); // Delete book
+
+$router->resolve();
