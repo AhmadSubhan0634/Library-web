@@ -34,7 +34,7 @@ class Router{
             // Checks to guard against a malformed action
             if(count($parts) !== 2 || !class_exists($parts[0]) || !method_exists($parts[0],$parts[1])){
                 http_response_code(500);
-                echo "Error. Controller or method is not found";
+                View::render('errors/500', ['message' => 'Controller or method could not be found.']);
                 return;
             }
 
@@ -43,12 +43,15 @@ class Router{
                 $class->{$parts[1]}();
             } catch (PDOException $e) {
                 http_response_code(500);
-                echo "Database connection failed.";
+                View::render('errors/500', ['message' => 'Database connection failed.']);
+            } catch (\Throwable $e) {
+                http_response_code(500);
+                View::render('errors/500', ['message' => 'An unexpected error occurred.']);
             }
         }
         else{
             http_response_code(404);
-            echo "404 - Route not found";
+            View::render('errors/404');
         }
     }
 }
