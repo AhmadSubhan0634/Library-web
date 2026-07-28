@@ -1,24 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Book Result</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .message { padding: 10px; margin: 20px 0; }
-        .success { color: #155724; }
-        .error { color: #721c24; }
-    </style>
-</head>
-<body>
-    <div class="message <?= strpos($message, 'success') !== false ? 'success' : 'error' ?>">
-        <?= htmlspecialchars($message) ?>
-    </div>
+<?php $title = 'Add Book Result'; include __DIR__ . '/../layouts/header.php'; ?>
 
-    <p>
-        <a href="/books">Back to Book List</a>
-        <a href="/books/create">Add Another Book</a>
-    </p>
-</body>
-</html>
+<div class="alert <?= strpos($message, 'success') !== false ? 'alert-success' : 'alert-danger' ?>">
+    <?= htmlspecialchars($message) ?>
+</div>
+<a href="/books" class="btn btn-secondary">Back to Book List</a>
+<a href="/books/create" class="btn btn-success">Add Another Book</a>
+
+<?php include __DIR__ . '/../layouts/footer.php'; ?>

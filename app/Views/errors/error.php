@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Error</title>
-</head>
-<body>
-    <h1>Error</h1>
-    <p style="color: red;"><?= htmlspecialchars($message) ?></p>
-    <a href="/books">Continue browsing as guest</a>
-</body>
-</html>
+<?php $title = 'Error'; include __DIR__ . '/../layouts/header.php'; ?>
+
+<div class="alert alert-danger" role="alert">
+    <?= htmlspecialchars($message) ?>
+</div>
+<a href="/books" class="btn btn-secondary">Back to Book List</a>
+
+<?php include __DIR__ . '/../layouts/footer.php'; ?>

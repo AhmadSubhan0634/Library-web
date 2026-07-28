@@ -1,29 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Register</title>
-</head>
-<body>
-    <h1>Register</h1>
+<?php $title = 'Register'; include __DIR__ . '/../layouts/header.php'; ?>
 
-    <?php if (isset($error)): ?>
-        <p style="color: red;"><?= htmlspecialchars($error) ?></p>
-    <?php endif; ?>
+<h1>Register</h1>
 
-    <form method="POST" action="/register">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required><br><br>
+<?php if (isset($error)): ?>
+    <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+<?php endif; ?>
 
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" minlength="8" required><br><br>
+<form method="POST" action="/register" class="col-md-4">
+    <div class="mb-3">
+        <label class="form-label">Username</label>
+        <input type="text" name="username" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="form-control" minlength="8" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Confirm Password</label>
+        <input type="password" name="confirm_password" class="form-control" minlength="8" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Register</button>
+</form>
 
-        <label for="confirm_password">Confirm Password:</label>
-        <input type="password" id="confirm_password" name="confirm_password" minlength="8" required><br><br>
+<p class="mt-3"><a href="/login">Already have an account? Log in</a></p>
 
-        <button type="submit">Register</button>
-    </form>
-
-    <p><a href="/login">Already have an account? Log in</a></p>
-</body>
-</html>
+<?php include __DIR__ . '/../layouts/footer.php'; ?>

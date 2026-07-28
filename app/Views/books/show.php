@@ -1,42 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Details</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .detail-row { padding: 5px 0; }
-        .label { font-weight: bold; display: inline-block; width: 100px; }
-    </style>
-</head>
-<body>
-    <h1>Book Details</h1>
+<?php $title = 'Book Details'; include __DIR__ . '/../layouts/header.php'; ?>
 
-    <div class="detail-row">
-        <span class="label">Title:</span>
-        <?= htmlspecialchars($book->getTitle()) ?>
+<h1>Book Details</h1>
+<div class="card" style="max-width: 500px;">
+    <div class="card-body">
+        <h5 class="card-title"><?= htmlspecialchars($book->getTitle()) ?></h5>
+        <p class="card-text">
+            <strong>Author:</strong> <?= htmlspecialchars($book->getAuthor()) ?><br>
+            <strong>ISBN:</strong> <?= htmlspecialchars($book->getIsbn()) ?><br>
+            <strong>Category:</strong> <?= htmlspecialchars($book->getCategory()) ?><br>
+            <strong>Year:</strong> <?= htmlspecialchars($book->getYear()) ?>
+        </p>
+        <a href="/books" class="btn btn-secondary">Back to List</a>
+        <?php if (isset($_SESSION['user_id'])): ?>
+            <a href="/books/edit?isbn=<?= urlencode($book->getIsbn()) ?>" class="btn btn-primary">Edit Book</a>
+        <?php endif; ?>
     </div>
-    <div class="detail-row">
-        <span class="label">Author:</span>
-        <?= htmlspecialchars($book->getAuthor()) ?>
-    </div>
-    <div class="detail-row">
-        <span class="label">ISBN:</span>
-        <?= htmlspecialchars($book->getIsbn()) ?>
-    </div>
-    <div class="detail-row">
-        <span class="label">Category:</span>
-        <?= htmlspecialchars($book->getCategory()) ?>
-    </div>
-    <div class="detail-row">
-        <span class="label">Year:</span>
-        <?= htmlspecialchars($book->getYear()) ?>
-    </div>
+</div>
 
-    <p>
-        <a href="/books">Back to List</a>
-        <a href="/books/edit?isbn=<?= urlencode($book->getIsbn()) ?>">Edit Book</a>
-    </p>
-</body>
-</html>
+<?php include __DIR__ . '/../layouts/footer.php'; ?>

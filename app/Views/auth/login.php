@@ -1,24 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Login</title>
-</head>
-<body>
-    <h1>Login</h1>
+<?php $title = 'Login'; include __DIR__ . '/../layouts/header.php'; ?>
 
-    <?php if (isset($error)): ?>
-        <p style="color: red;"><?= htmlspecialchars($error) ?></p>
-    <?php endif; ?>
+<h1>Login</h1>
 
-    <form method="POST" action="/login">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required><br><br>
+<?php if (isset($error)): ?>
+    <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+<?php endif; ?>
 
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required><br><br>
+<form method="POST" action="/login" class="col-md-4">
+    <div class="mb-3">
+        <label class="form-label">Username</label>
+        <input type="text" name="username" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Log In</button>
+</form>
 
-        <button type="submit">Log In</button>
-    </form>
-</body>
-</html>
+<p class="mt-3">
+    <a href="/books">Continue browsing as guest</a> |
+    <a href="/register">Need an account? Register</a>
+</p>
+
+<?php include __DIR__ . '/../layouts/footer.php'; ?>

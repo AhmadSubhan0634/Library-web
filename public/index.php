@@ -1,33 +1,35 @@
 <?php
-require_once __DIR__ . '/../vendor/autoload.php';
+
+session_start();
+
+require __DIR__ . '/../vendor/autoload.php';
 
 use App\Core\Router;
 use App\Controllers\HomeController;
 use App\Controllers\BookController;
 use App\Controllers\AuthController;
 
-// Start session for authentication
-session_start();
-
 $router = new Router();
 
-// Home routes
-$router->get('/', 'App\Controllers\HomeController@index');
+// Home route
+$router->get('/', HomeController::class . '@index');
 
 // Book routes
-$router->get('/books', 'App\Controllers\BookController@index');
-$router->get('/books/show', 'App\Controllers\BookController@show');
-$router->get('/books/create', 'App\Controllers\BookController@create');
-$router->post('/books/store', 'App\Controllers\BookController@store');
-$router->get('/books/edit', 'App\Controllers\BookController@edit');
-$router->post('/books/update', 'App\Controllers\BookController@update');
-$router->post('/books/delete', 'App\Controllers\BookController@destroy');
+$router->get('/books', BookController::class . '@index');
+$router->get('/books/create', BookController::class . '@create');
+$router->post('/books/store', BookController::class . '@store');
+$router->get('/books/show', BookController::class . '@show');
+$router->get('/books/edit', BookController::class . '@edit');
+$router->post('/books/update', BookController::class . '@update');
+$router->post('/books/delete', BookController::class . '@destroy');
 
-// AUTH ROUTES - Make sure ALL of these are present!
-$router->get('/login', 'App\Controllers\AuthController@showLogin');
-$router->post('/login', 'App\Controllers\AuthController@login');
-$router->get('/logout', 'App\Controllers\AuthController@logout');
-$router->get('/register', 'App\Controllers\AuthController@showRegister');  // ← IMPORTANT!
-$router->post('/register', 'App\Controllers\AuthController@register');      // ← IMPORTANT!
+// Auth routes
+$router->get('/login', AuthController::class . '@showLogin');
+$router->post('/login', AuthController::class . '@login');
+$router->get('/register', AuthController::class . '@showRegister');
+$router->post('/register', AuthController::class . '@register');
+$router->get('/logout', AuthController::class . '@logout');
 
+
+$router->get('/logout', AuthController::class . '@logout');
 $router->resolve();
