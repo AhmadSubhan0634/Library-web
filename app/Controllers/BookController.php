@@ -40,20 +40,24 @@ class BookController{
         }
 
         try {
-
             $search = trim($_GET['search'] ?? '');
-            $books = $search !== ''
-                ? $this->service->searchBooks($search)
-                : $this->service->listBooks();
-           
-            View::render('books/index', ['books' => $books]);
+            $page = max(1, (int)($_GET['page'] ?? 1));
+            $perPage = 10;
+
+            $result = $this->service->listBooksPaginated($page, $perPage, $search);
+
+            View::render('books/index', [
+                'books' => $result['books'],
+                'search' => $search,
+                'currentPage' => $result['currentPage'],
+                'totalPages' => $result['totalPages'],
+            ]);
         } catch (\RuntimeException $e) {
             $this->showError("View error: " . $e->getMessage());
         }
-        
+
         $this->disconnect();
     }
-
     public function show(): void{
         if ($this->error) {
             $this->showError($this->error);

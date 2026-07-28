@@ -62,6 +62,24 @@
             <?php endforeach; ?>
         </tbody>
     </table>
+
+    <?php if ($totalPages > 1): ?>
+        <nav aria-label="Book pages">
+            <ul class="pagination">
+                <li class="page-item <?= $currentPage <= 1 ? 'disabled' : '' ?>">
+                    <a class="page-link" href="/books?page=<?= $currentPage - 1 ?>&search=<?= urlencode($search ?? '') ?>">Previous</a>
+                </li>
+                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                    <li class="page-item <?= $i === $currentPage ? 'active' : '' ?>">
+                        <a class="page-link" href="/books?page=<?= $i ?>&search=<?= urlencode($search ?? '') ?>"><?= $i ?></a>
+                    </li>
+                <?php endfor; ?>
+                <li class="page-item <?= $currentPage >= $totalPages ? 'disabled' : '' ?>">
+                    <a class="page-link" href="/books?page=<?= $currentPage + 1 ?>&search=<?= urlencode($search ?? '') ?>">Next</a>
+                </li>
+            </ul>
+        </nav>
+    <?php endif; ?>
 <?php endif; ?>
 
 <?php include __DIR__ . '/../layouts/footer.php'; ?>
