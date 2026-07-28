@@ -2,7 +2,7 @@
 
 A browser-based Library Management System built as a mini MVC framework **without** using Laravel, Symfony, or any other framework — built from scratch to understand what a framework actually does under the hood.
 
-> **Status:** Assignments 1–5 complete (Composer Autoloading, Router, PDO Database Layer, MVC/View separation, Authentication). Assignments 6–10 are not yet implemented.
+> **Status:** Assignments 1–8 complete (Composer Autoloading, Router, PDO Database Layer, MVC/View separation, Authentication). Assignments 9–10 are not yet implemented.
 
 ## Project Overview
 
@@ -234,6 +234,42 @@ Open /books/create without logging in — you should be redirected to /login. Af
 
 All CRUD pages (list, create, edit, delete, show) render with Bootstrap styling and remain fully functional — no changes to controller logic, only to view markup.
 
+## Assignment 8 — Search
+
+**Goal:** Search books by Title, Author, or ISBN using GET requests, e.g. `/books?search=clean`.
+
+### What was done
+
+1. Added `search(string $query): array` to `BookRepositoryInterface` and implemented it in `MySqlBookRepository`:
+
+```php
+public function search(string $query): array
+{
+    $statement = $this->pdo->prepare(
+        self::SELECT_BASE . " WHERE b.title LIKE :q OR a.name LIKE :q OR b.isbn LIKE :q"
+    );
+    $statement->execute(['q' => '%' . $query . '%']);
+    return array_map([$this, 'hydrate'], $statement->fetchAll());
+}
+```
+
+One query checks all three fields (title, author, ISBN) at once using `LIKE`, joined via the existing `authors` table.
+
+2. Added `searchBooks(string $query): array` to `LibraryService`, delegating to the repository.
+3. Updated `BookController::index()` to read `$_GET['search']`:
+
+```php
+$search = trim($_GET['search'] ?? '');
+$books = $search !== '' ? $this->service->searchBooks($search) : $this->service->listBooks();
+```
+
+4. Added a GET search form to `Views/books/index.php`, pre-filled with the current query, plus a "Clear" link and a "Showing results for ..." message when a search is active.
+
+### Validation
+
+- `/books?search=clean` returns books matching "clean" in title, author, or ISBN
+- `/books` (no search param) still shows the full list as before
+- Searching for a non-matching term shows "No books found."
 
 ## Installation
 
@@ -255,7 +291,6 @@ Then visit `http://localhost:8000`.
 
 ## Upcoming Work
 
-- [ ] Assignment 8 — Search
 - [ ] Assignment 9 — Pagination
 - [ ] Assignment 10 — Custom 404/500 error pages
 
