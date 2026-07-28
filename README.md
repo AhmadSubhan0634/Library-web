@@ -2,7 +2,7 @@
 
 A browser-based Library Management System built as a mini MVC framework **without** using Laravel, Symfony, or any other framework — built from scratch to understand what a framework actually does under the hood.
 
-> **Status:** Assignments 1–9 complete (Composer Autoloading, Router, PDO Database Layer, MVC/View separation, Authentication). Assignments 10 is not yet implemented.
+> **Status:** Assignments 1–10 complete (Composer Autoloading, Router, PDO Database Layer, MVC/View separation, Authentication, Session Management, CRUD Interface, Search, Pagination, Error pages).
 
 ## Project Overview
 
@@ -290,6 +290,26 @@ $books = $search !== '' ? $this->service->searchBooks($search) : $this->service-
 - `/books?page=2` shows the next 10
 - Searching and paginating together (`/books?search=clean&page=1`) work correctly — page links keep the search term attached
 - With fewer than 11 total books, no pagination controls are shown at all
+
+## Assignment 10 — Custom Error Pages
+
+**Goal:** Custom 404 and 500 pages instead of raw PHP errors.
+
+### What was done
+
+1. Added `Views/errors/404.php` and `Views/errors/500.php`, both using the shared Bootstrap layout (`layouts/header.php` / `footer.php`) for a consistent look with the rest of the app
+2. Updated `App\Core\Router::resolve()`:
+   - Unmatched routes now call `View::render('errors/404')` instead of `echo "404 - Route not found"`
+   - Malformed actions / missing controller-method pairs render `errors/500` with a relevant message
+   - Database connection failures (caught `PDOException`) render `errors/500` with "Database connection failed."
+   - Added a catch-all `\Throwable` handler so any other unexpected error also renders the 500 page instead of a raw PHP stack trace, while still setting the correct HTTP status code
+
+### Validation
+
+- Visiting an unregistered path (e.g. `/nonexistent-page`) shows the styled 404 page, with a real `404` HTTP status code
+- Simulating a database failure (invalid credentials) shows the styled 500 page with "Database connection failed.", with a real `500` HTTP status code
+- No raw PHP error output or stack traces are ever shown to the user
+
 
 ## Installation
 
