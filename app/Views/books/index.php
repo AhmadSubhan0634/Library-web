@@ -9,6 +9,23 @@
     <?php endif; ?>
 </div>
 
+<form method="GET" action="/books" class="row g-2 mb-3">
+    <div class="col-auto flex-grow-1">
+        <input type="text" name="search" class="form-control" placeholder="Search by title, author, or ISBN"
+               value="<?= htmlspecialchars($search ?? '') ?>">
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-outline-primary">Search</button>
+        <?php if (!empty($search)): ?>
+            <a href="/books" class="btn btn-outline-secondary">Clear</a>
+        <?php endif; ?>
+    </div>
+</form>
+
+<?php if (!empty($search)): ?>
+    <p class="text-muted">Showing results for "<?= htmlspecialchars($search) ?>"</p>
+<?php endif; ?>
+
 <?php if (empty($books)): ?>
     <p class="text-muted fst-italic">No books found.</p>
 <?php else: ?>

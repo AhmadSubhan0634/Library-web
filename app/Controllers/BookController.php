@@ -40,7 +40,12 @@ class BookController{
         }
 
         try {
-            $books = $this->service->listBooks();
+
+            $search = trim($_GET['search'] ?? '');
+            $books = $search !== ''
+                ? $this->service->searchBooks($search)
+                : $this->service->listBooks();
+           
             View::render('books/index', ['books' => $books]);
         } catch (\RuntimeException $e) {
             $this->showError("View error: " . $e->getMessage());
