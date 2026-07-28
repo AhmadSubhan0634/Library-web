@@ -189,7 +189,7 @@ $router->get('/logout', AuthController::class . '@logout');
 - Registering with a duplicate username, a too-short password, or mismatched password confirmation is rejected with a specific message
 - Visiting `/logout` clears the session and redirects to `/login`
 
-## Assignment 5 — Session Management
+## Assignment 6 — Session Management
 
 **Goal:** Protect sensitive routes so only logged-in users can create, edit, or delete books. Guests can only view the book list.
 
