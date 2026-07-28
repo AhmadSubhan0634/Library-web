@@ -65,4 +65,16 @@ class LibraryService{
     public function searchBooks(string $query): array{
         return $this->repo->search($query);
     }
+
+    public function listBooksPaginated(int $page, int $perPage, string $search = ''): array{
+        $books = $this->repo->getPage($page, $perPage, $search);
+        $total = $this->repo->countAll($search);
+        $totalPages = (int) max(1, ceil($total / $perPage));
+
+        return [
+            'books' => $books,
+            'totalPages' => $totalPages,
+            'currentPage' => $page,
+        ];
+    }
 }

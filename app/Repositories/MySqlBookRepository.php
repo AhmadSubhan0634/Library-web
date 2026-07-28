@@ -119,7 +119,50 @@ class MySqlBookRepository implements BookRepositoryInterface{
             'author' => $like,
             'isbn'   => $like,
         ]);
-    
+
         return array_map([$this, 'hydrate'], $statement->fetchAll());
     }
+
+    public function getPage(int $page, int $perPage, string $search = ''): array{
+        $offset = ($page - 1) * $perPage;
+
+        if ($search !== '') {
+            $sql = self::SELECT_BASE . " WHERE b.title LIKE :title OR a.name LIKE :author OR b.isbn LIKE :isbn
+                ORDER BY b.title,b.isbn LIMIT :limit OFFSET :offset";
+            $statement = $this->pdo->prepare($sql);
+            $statement->bindValue(':title', '%' . $search . '%');
+            $statement->bindValue(':author', '%' . $search . '%');
+            $statement->bindValue(':isbn', '%' . $search . '%');
+        } else {
+            $sql = self::SELECT_BASE . " ORDER BY b.title,b.isbn LIMIT :limit OFFSET :offset";
+            $statement = $this->pdo->prepare($sql);
+        }
+
+        $statement->bindValue(':limit', $perPage, PDO::PARAM_INT);
+        $statement->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $statement->execute();
+
+        return array_map([$this, 'hydrate'], $statement->fetchAll());
+    }
+
+    // Total matching rows, needed to calculate how many pages exist.
+    public function countAll(string $search = ''): int{
+        if ($search !== '') {
+            $sql = "SELECT COUNT(*) as total FROM books b
+                LEFT JOIN authors a ON b.author_id = a.id
+                WHERE b.title LIKE :title OR a.name LIKE :author OR b.isbn LIKE :isbn";
+            $statement = $this->pdo->prepare($sql);
+            $like = '%' . $search . '%';
+            $statement->execute([
+                'title'  => $like,
+                'author' => $like,
+                'isbn'   => $like,
+            ]);
+        } else {
+            $statement = $this->pdo->query("SELECT COUNT(*) as total FROM books");
+        }
+
+        $row = $statement->fetch();
+        return (int)($row['total'] ?? 0);
+    }  
 }
