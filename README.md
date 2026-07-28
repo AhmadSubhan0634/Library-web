@@ -2,7 +2,7 @@
 
 A browser-based Library Management System built as a mini MVC framework **without** using Laravel, Symfony, or any other framework — built from scratch to understand what a framework actually does under the hood.
 
-> **Status:** Assignments 1–8 complete (Composer Autoloading, Router, PDO Database Layer, MVC/View separation, Authentication). Assignments 9–10 are not yet implemented.
+> **Status:** Assignments 1–9 complete (Composer Autoloading, Router, PDO Database Layer, MVC/View separation, Authentication). Assignments 10 is not yet implemented.
 
 ## Project Overview
 
@@ -270,6 +270,26 @@ $books = $search !== '' ? $this->service->searchBooks($search) : $this->service-
 - `/books?search=clean` returns books matching "clean" in title, author, or ISBN
 - `/books` (no search param) still shows the full list as before
 - Searching for a non-matching term shows "No books found."
+
+## Assignment 9 — Pagination
+
+**Goal:** Display 10 books per page, with Previous / page numbers / Next navigation.
+
+### What was done
+
+1. Added `getPage(int $page, int $perPage, string $search = '')` and `countAll(string $search = '')` to `BookRepositoryInterface`, implemented in `MySqlBookRepository`:
+   - `getPage()` uses `LIMIT`/`OFFSET` (bound as integers) to fetch one page, honoring the Assignment 8 search term if present, ordered by title for stable results across pages
+   - `countAll()` returns the total number of matching rows, used to calculate page count
+2. Added `listBooksPaginated(int $page, int $perPage, string $search = '')` to `LibraryService`, returning the page's books plus `totalPages`/`currentPage`
+3. `BookController::index()` now reads `$_GET['page']` (default 1) alongside `$_GET['search']`, fixed at 10 books per page
+4. Added Bootstrap pagination markup (`Views/books/index.php`) — Previous / numbered pages / Next, each link preserving the current search term, with the current page marked `active` and out-of-range Previous/Next disabled
+
+### Validation
+
+- With more than 10 books, `/books` shows only the first 10, with page links below
+- `/books?page=2` shows the next 10
+- Searching and paginating together (`/books?search=clean&page=1`) work correctly — page links keep the search term attached
+- With fewer than 11 total books, no pagination controls are shown at all
 
 ## Installation
 
