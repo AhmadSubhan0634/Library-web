@@ -107,4 +107,19 @@ class MySqlBookRepository implements BookRepositoryInterface{
         $year=$row['pub_year']?(int)$row['pub_year']:0;
         return new Book($row['title'],$row['author_name']??'',$row['isbn'],$row['category_name']??'',$year);
     }
+
+    // Searches across title, author name, and ISBN in one query.
+    public function search(string $query): array{
+        $statement = $this->pdo->prepare(
+            self::SELECT_BASE . " WHERE b.title LIKE :title OR a.name LIKE :author OR b.isbn LIKE :isbn"
+        );
+        $like = '%' . $query . '%';
+        $statement->execute([
+            'title'  => $like,
+            'author' => $like,
+            'isbn'   => $like,
+        ]);
+    
+        return array_map([$this, 'hydrate'], $statement->fetchAll());
+    }
 }

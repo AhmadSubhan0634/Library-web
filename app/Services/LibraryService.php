@@ -60,4 +60,9 @@ class LibraryService{
             ? "Book deleted successfully."
             : "Error: No book found with ISBN '$isbn'.";
     }
+
+        // Searches title, author, and ISBN together — used by the /books?search= GET parameter.
+    public function searchBooks(string $query): array{
+        return $this->repo->search($query);
+    }
 }
