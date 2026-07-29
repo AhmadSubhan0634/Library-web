@@ -14,7 +14,7 @@ This project reimplements a console-based Library System as a real browser-based
 - How MVC separates data (Models), display (Views), and decision-making (Controllers)
 - How a database layer, authentication, and sessions fit into all of this
 
-By the end, the app will let users browse, search, add, edit, and delete books through a proper web UI backed by MySQL — but every layer along the way is built by hand first.
+The finished app lets users browse, search, add, edit, and delete books through a proper web UI backed by MySQL — with every layer built by hand first.
 
 ## Tech Stack
 
@@ -23,55 +23,55 @@ By the end, the app will let users browse, search, add, edit, and delete books t
 - MySQL
 - PDO
 - Apache / PHP built-in server
-- Bootstrap 5 (not yet added — Assignment 7)
+- Bootstrap 5
 
 ## Architecture
 
-```
 Browser
-  │
-  v
-public/index.php   (front controller — the single entry point for every request)
-  │
-  v
-Core\Router          (matches HTTP method + URI to a Controller action)
-  │
-  v
-Controllers            (receive the request, delegate to a Service/Repository, render a View)
-  │
-  v
-Services / Repositories   (business logic + data access — MySQL via PDO)
-  │
-  v
-Models                      (plain data objects, e.g. Book, User)
+│
+v
+public/index.php (front controller — the single entry point for every request)
+│
+v
+Core\Router (matches HTTP method + URI to a Controller action)
+│
+v
+Controllers (receive the request, delegate to a Service/Repository, render a View)
+│
+v
+Services / Repositories (business logic + data access — MySQL via PDO)
+│
+v
+Models (plain data objects, e.g. Book, User)
 
 Controllers also hand data off sideways to:
-Core\View                (renders a template from app/Views/ and returns/echoes HTML)
-```
+Core\View (renders a template from app/Views/ and returns/echoes HTML)
+
 
 ## Folder Structure
 
-```
 library-web/
 ├── app/
-│   ├── Controllers/     # HomeController, BookController, AuthController
-│   ├── Models/          # Book, User
-│   ├── Services/        # LibraryService
-│   ├── Repositories/    # BookRepositoryInterface, MySqlBookRepository, BookMapper,
-│   │                    # UserRepositoryInterface, MySqlUserRepository
-│   ├── Views/
-│   │   ├── layouts/     # Shared page structure (header/footer wrapper)
-│   │   ├── books/       # index, show, create, edit, store, update, delete
-│   │   ├── auth/        # login, register
-│   │   ├── home/        # index
-│   │   └── errors/      # error.php (shared 404/500 template)
-│   └── Core/            # Router, Database, Request, Response, View
+│ ├── Controllers/ # HomeController, BookController, AuthController
+│ ├── Models/ # Book, User
+│ ├── Services/ # LibraryService
+│ ├── Repositories/ # BookRepositoryInterface, MySqlBookRepository, BookMapper,
+│ │ # UserRepositoryInterface, MySqlUserRepository
+│ ├── Views/
+│ │ ├── layouts/ # Shared page structure (header/footer wrapper)
+│ │ ├── books/ # index, show, create, edit, store, update, delete
+│ │ ├── auth/ # login, register
+│ │ ├── home/ # index
+│ │ └── errors/ # error.php, 404.php, 500.php
+│ └── Core/ # Router, Database, Request, Response, View
 ├── public/
-│   └── index.php        # Application entry point
+│ └── index.php # Application entry point
+├── database/
+│ └── schema.sql # books, authors, category, users tables
 ├── composer.json
 ├── .gitignore
 └── README.md
-```
+
 
 | Folder | Responsibility |
 |---|---|
@@ -87,11 +87,16 @@ library-web/
 - **PSR-4 autoloading over `require_once`** — every class is loaded automatically based on its namespace, matching how real-world PHP projects (and Composer packages) work.
 - **Front controller pattern** — a single `public/index.php` handles every request, rather than one PHP file per page.
 - **Interface-based repositories (`BookRepositoryInterface`, `UserRepositoryInterface`)** — chosen deliberately so the underlying storage can change without touching any controller or service code. Proven out in Assignment 3: the JSON-based book repository was swapped for a PDO/MySQL-based one without changing `BookController` or `LibraryService` at all. The same pattern was reused for users in Assignment 5.
-- **`::class` + string method dispatch** — mirrors the "Controller@method" convention used by Laravel, without needing its full routing engine.
-- **Graceful failure over crashes** — the Router checks `class_exists()`/`method_exists()` before dispatching, returning `404`/`500` instead of raw fatal errors. Extended in Assignment 3 to also catch database connection failures.
+- **Service layer (`LibraryService`) between Controllers and Repositories** — business rules (e.g. rejecting a duplicate ISBN) live in one place, not scattered across controllers.
 - **Prepared statements throughout** — every SQL query in `MySqlBookRepository` and `MySqlUserRepository` uses bound parameters, avoiding SQL injection.
-- **Controllers hand data to Views instead of echoing HTML** — `Core\View` centralizes template rendering, so every controller action just prepares data and calls one method rather than building markup inline.
+- **Normalized schema with `findOrCreate` helpers** — authors and categories live in their own tables, referenced from `books` via foreign keys, avoiding duplicate author/category rows.
+- **Controllers hand data to Views instead of echoing HTML** — `Core\View` centralizes template rendering (Assignment 4), so every controller action just prepares data and calls one method rather than building markup inline.
+- **`::class` + string method dispatch** — mirrors the "Controller@method" convention used by Laravel, without needing its full routing engine.
 - **Passwords are never stored or compared in plaintext** — `password_hash()` on registration, `password_verify()` on login, per Assignment 5's requirement.
+- **Session-based authentication (`$_SESSION['user_id']`)** — a single `requireLogin()` guard, checked at the top of every state-changing book method (create/store/edit/update/destroy) in Assignment 6, keeps guests able to view and search while restricting mutation.
+- **Bootstrap via CDN, not a build pipeline** — kept the project dependency-free (no npm/webpack) for Assignment 7's styling; a shared `layouts/header.php`/`footer.php` avoids repeating the CDN link and navbar markup in every view.
+- **Search and pagination share one query path** — `search()` (Assignment 8) and `getPage()`/`countAll()` (Assignment 9) both operate on the same `title`/`author`/`isbn` `LIKE` condition, so searched results paginate correctly instead of being two diverging code paths.
+- **Graceful failure over crashes** — the Router checks `class_exists()`/`method_exists()` before dispatching, wraps controller execution in a `try/catch` for both `PDOException` and a catch-all `\Throwable`, and returns proper HTTP status codes (`404`/`500`) with styled error pages instead of raw PHP crashes (Assignment 10).
 
 ## Assignment 1 — Composer Autoloading
 
@@ -150,7 +155,7 @@ No file in the project uses `require_once` — every class loads purely through 
 
 ### Validation
 
-- `Controllers/` (with one noted exception below) contain no HTML tags
+- `Controllers/` contain no HTML tags
 - `Views/` contain no SQL or direct repository/service calls
 - `Models/` contain only properties, constructors, and getters/setters
 
@@ -167,7 +172,7 @@ No file in the project uses `require_once` — every class loads purely through 
 5. Built `App\Controllers\AuthController`:
    - `showLogin()` / `showRegister()` — render the login/registration forms via `View::render()`
    - `register()` — validates input (required fields, minimum password length, password confirmation match, username uniqueness), hashes the password with `password_hash()`, and saves the new user
-   - `login()` — starts a session, looks up the user by username, verifies the password with `password_verify()`, and stores `$_SESSION['user_id']` on success
+   - `login()` — looks up the user by username, verifies the password with `password_verify()`, and stores `$_SESSION['user_id']` on success
    - `logout()` — destroys the session and redirects to `/login`
 6. Registered routes in `public/index.php`:
 
@@ -179,7 +184,7 @@ $router->post('/register', AuthController::class . '@register');
 $router->get('/logout', AuthController::class . '@logout');
 ```
 
-7. Added `session_start()` to `public/index.php` so session data is available to every controller
+7. Added `session_start()` to `public/index.php` (before any output) so session data is available to every controller
 
 ### Validation
 
@@ -195,23 +200,26 @@ $router->get('/logout', AuthController::class . '@logout');
 
 ### What was done
 
-1. Added session initialization — session_start() is called at the very beginning of public/index.php before any output, ensuring $_SESSION is available throughout the request lifecycle
-   - `Views/layouts/footer.php` — closes the container, loads Bootstrap's JS bundle
-2. Implemented authentication middleware pattern — BookController now includes a private requireLogin() helper method that checks for $_SESSION['user_id'] before allowing any create/edit/delete operation:
+1. `session_start()` is called at the very beginning of `public/index.php`, before any output, ensuring `$_SESSION` is available throughout the request lifecycle
+2. Added a private `requireLogin()` guard to `BookController`, called as the first line of `create()`, `store()`, `edit()`, `update()`, and `destroy()`:
 
 ```php
-
-private function requireAuth(): void{
+private function requireLogin(): void
+{
     if (!isset($_SESSION['user_id'])) {
-        header('Location: /login?redirect=' . urlencode($_SERVER['REQUEST_URI']));
+        header('Location: /login');
         exit;
     }
 }
 ```
 
+3. Updated `Views/books/index.php` to hide the "Add New Book" link and each row's Edit/Delete controls unless a session exists — guests see a "Log in to add or edit books" prompt instead. "View" remains visible to everyone.
+
 ### Validation
 
-Open /books/create without logging in — you should be redirected to /login. After logging in, the same URL should display the create book form. Inspect the database to confirm passwords are stored as bcrypt hashes ($2y$10$...), not plain text.
+- Opening `/books/create` without logging in redirects to `/login`; after logging in, the same URL displays the create-book form
+- Logged out, `/books` shows only View links — no Add/Edit/Delete controls
+- Inspecting the database confirms passwords are stored as bcrypt hashes (`$2y$10$...`), not plain text
 
 ## Assignment 7 — CRUD Interface with Bootstrap
 
@@ -310,7 +318,6 @@ $books = $search !== '' ? $this->service->searchBooks($search) : $this->service-
 - Simulating a database failure (invalid credentials) shows the styled 500 page with "Database connection failed.", with a real `500` HTTP status code
 - No raw PHP error output or stack traces are ever shown to the user
 
-
 ## Installation
 
 **Requirements:** PHP 8.3+, Composer, MySQL
@@ -321,18 +328,13 @@ cd library-web
 composer install
 ```
 
-Import the schema (`books`, `authors`, `category`, `users` tables) into MySQL, then update the connection details in each controller's constructor to match your local setup.
+Import the schema (`books`, `authors`, `category`, `users` tables) from `database/schema.sql` into MySQL, then update the connection details in `BookController`'s and `AuthController`'s constructors to match your local setup.
 
 ```bash
-php -S localhost:8000 -t public public/index.php
+php -S localhost:8000 -t public
 ```
 
 Then visit `http://localhost:8000`.
-
-## Upcoming Work
-
-- [ ] Assignment 9 — Pagination
-- [ ] Assignment 10 — Custom 404/500 error pages
 
 ## Author
 
